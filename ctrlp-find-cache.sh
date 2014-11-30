@@ -23,7 +23,7 @@
 
 function die
 {
-  test -n "$@" && echo "ctrlp-find-cache: $@"
+  test -n "$@" && echo "ctrlp-find-cache: $@" 1>&2
   exit 1
 }
 
@@ -44,38 +44,47 @@ cache_filename=$(base64 -w 0 <<< "$search_path")
 cache_filename=${cache_filename//\//%}
 cache_filepath=$cache_dir/$cache_filename
 lockdir="$cache_dir/.%lockdir%$cache_filename"
-unset cleanup_lockdir
+unset owning_find_process
 
 mkdir "$lockdir" >/dev/null 2>&1
 if [[ $? -eq 0 ]] ; then
   LANG="en" find "$search_path" "$@" |& \
     grep -v "^find: \`.*': Permission denied$" > "$lockdir/cache" &
   find_pid=$!
-  echo -n "$find_pid" > "$lockdir/pid"
-  cleanup_lockdir=1
+  find_cache_pid=$$
+  echo -n "$find_pid" > "$lockdir/find_pid"
+  echo -n "$find_cache_pid" > "$lockdir/find_cache_pid"
+  owning_find_process=1
 else
-  find_pid=$(cat "$lockdir/pid" 2>/dev/null)
-  test -z "$find_pid" && \
-    die "inconsistent directory: '$cache_dir'. Remove it and try again."
+  find_pid=$(cat "$lockdir/find_pid" 2>/dev/null)
+  find_cache_pid=$(cat "$lockdir/find_cache_pid" 2>/dev/null)
+  if [[ -z "$find_pid" || -z "$find_cache_pid" ]] ; then
+    die "please remove inconsistent lock directories from cache."
+  fi
 fi
 
+# Finishes a search, which must be started by this processes. Check
+# $owning_find_process first, before calling this function. It will return
+# 1, if removing the lockdir failed.
 function finish_search
 {
-  # Wait for $find_pid, which is not always a child process:
-  while kill -0 "$find_pid" 2>/dev/null; do sleep 0.5; done
-
-  # Return, if this process is not responsiple for cleaning up.
-  test -z "$cleanup_lockdir" && sleep 0.5 && return
-
+  while kill -0 $find_pid 2>/dev/null; do sleep 0.1; done
   mv "$lockdir/cache" "$cache_filepath"
-  rm "$lockdir/pid"
-  rmdir "$lockdir" 2>/dev/null || die "failed to remove lockdir."
+  rm "$lockdir/find_pid" "$lockdir/find_cache_pid"
+  rmdir "$lockdir" 2>/dev/null || return 1
 }
 
 if [[ -e "$cache_filepath" ]] ; then
   cat "$cache_filepath"
-  finish_search &
+  test -n "$owning_find_process" && finish_search &
 else
-  finish_search
+  if [[ -n "$owning_find_process" ]] ; then
+    finish_search || die "failed to remove lockdir."
+  else
+    while kill -0 $find_pid $find_cache_pid 2>/dev/null; do sleep 0.1; done
+    test ! -e "$cache_filepath" && test -e "$lockdir" && \
+      die "please remove orphaned lock directories from cache."
+  fi
+
   cat "$cache_filepath"
 fi
