@@ -51,16 +51,11 @@ if [[ $? -eq 0 ]] ; then
   LANG="en" find "$search_path" "$@" |& \
     grep -v "^find: \`.*': Permission denied$" > "$lockdir/cache" &
   find_pid=$!
-  find_cache_pid=$$
-  echo -n "$find_pid" > "$lockdir/find_pid"
-  echo -n "$find_cache_pid" > "$lockdir/find_cache_pid"
   owning_find_process=1
 else
-  find_pid=$(cat "$lockdir/find_pid" 2>/dev/null)
   find_cache_pid=$(cat "$lockdir/find_cache_pid" 2>/dev/null)
-  if [[ -z "$find_pid" || -z "$find_cache_pid" ]] ; then
-    die "please remove inconsistent lock directories from cache."
-  fi
+  test -n "$find_cache_pid" || \
+    die "failed to wait on running processes."
 fi
 
 # Finishes a search, which must be started by this processes. Check
@@ -68,9 +63,10 @@ fi
 # 1, if removing the lockdir failed.
 function finish_search
 {
-  while kill -0 $find_pid 2>/dev/null; do sleep 0.1; done
+  echo -n "$BASHPID" > "$lockdir/find_cache_pid"
+  while kill -0 "$find_pid" 2>/dev/null; do sleep 0.1; done
   mv "$lockdir/cache" "$cache_filepath"
-  rm "$lockdir/find_pid" "$lockdir/find_cache_pid"
+  rm "$lockdir/find_cache_pid"
   rmdir "$lockdir" 2>/dev/null || return 1
 }
 
@@ -81,7 +77,7 @@ else
   if [[ -n "$owning_find_process" ]] ; then
     finish_search || die "failed to remove lockdir."
   else
-    while kill -0 $find_pid $find_cache_pid 2>/dev/null; do sleep 0.1; done
+    while kill -0 "$find_cache_pid" 2>/dev/null; do sleep 0.1; done
     test ! -e "$cache_filepath" && test -e "$lockdir" && \
       die "please remove orphaned lock directories from cache."
   fi
