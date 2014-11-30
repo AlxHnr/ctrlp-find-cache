@@ -54,8 +54,7 @@ if [[ $? -eq 0 ]] ; then
   owning_find_process=1
 else
   find_cache_pid=$(cat "$lockdir/find_cache_pid" 2>/dev/null)
-  test -n "$find_cache_pid" || \
-    die "failed to wait on running processes."
+  test -n "$find_cache_pid" || die "failed to wait on running processes."
 fi
 
 # Finishes a search, which must be started by this processes. Check
