@@ -1,0 +1,78 @@
+*ctrlp-find-cache*                                  Asynchronous cache for ctrlp.
+
+CONTENTS                                              *ctrlp-find-cache-contents*
+
+  1. Description                                   |ctrlp-find-cache-description|
+  2. Options                                           |ctrlp-find-cache-options|
+    2.1 Path to find cache command                   |g:ctrlp_find_cache#command|
+    2.2 Additional arguments for find              |g:ctrlp_find_cache#arguments|
+  3. License                                           |ctrlp-find-cache-license|
+
+===============================================================================
+1. Description                                     *ctrlp-find-cache-description*
+
+This plugin provides asynchronous caching for ctrlp. It spawns find as a
+background process to cache its output for subsequent runs. Thus you can only
+search trough files, which already existed at the time of the previous search.
+
+This plugin depends on ctrlp, bash, and various commands from coreutils.
+Almost all GNU/Linux distributions have them preinstalled already.
+
+===============================================================================
+2. Options                                             *ctrlp-find-cache-options*
+
+By default this plugin works out of the box. If you have not set
+|'g:ctrlp_user_command'|, it will be set to the concatenation of
+|g:ctrlp_find_cache#command|, the string ' %s ' and the variable
+|g:ctrlp_find_cache#arguments|.
+
+-------------------------------------------------------------------------------
+2.1 Path to find cache command                       *g:ctrlp_find_cache#command*
+
+The variable |g:ctrlp_find_cache#command| contains the full path to the
+find-cache shell script, which provides the core functionality of this plugin.
+
+-------------------------------------------------------------------------------
+2.2 Additional arguments for find                  *g:ctrlp_find_cache#arguments*
+
+The variable |g:ctrlp_find_cache#arguments| contains extra arguments, which
+will be passed to find. By default it contains various flags, which are needed
+to skip VCS directories, cache directories, build files and various file
+formats which Vim can't open.
+
+Default:
+>
+  let g:ctrlp_find_cache#arguments =
+    \ "-type f -regextype posix-extended -not -regex"
+    \ . " '^(.*\/)?(\.(cache|fontconfig|git)|build|CMakeFiles)(\/.*)?'"
+    \ . " -not -iregex '^.*\.(o|a|so|exe|dll|bin|pyc|gz|xz|bz2|zip|rar|pdf"
+    \ . "|png|jpe?g|ico|gif|xpm|bak)$'"
+    \ . " -not -regex '^.*[a-f]\d[a-f0-9]{10,}.*$'"
+<
+Changing this variable after this plugin was loaded won't have any effect. For
+this you must update |'g:ctrlp_user_command'| manually.
+
+===============================================================================
+3. License                                             *ctrlp-find-cache-license*
+>
+  Copyright (c) 2014 Alexander Heinrich <alxhnr@nudelpost.de>
+
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+     1. The origin of this software must not be misrepresented; you must
+        not claim that you wrote the original software. If you use this
+        software in a product, an acknowledgment in the product
+        documentation would be appreciated but is not required.
+
+     2. Altered source versions must be plainly marked as such, and must
+        not be misrepresented as being the original software.
+
+     3. This notice may not be removed or altered from any source
+        distribution.
+<
