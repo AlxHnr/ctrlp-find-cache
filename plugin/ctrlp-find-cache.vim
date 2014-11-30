@@ -56,3 +56,5 @@ if !exists('g:ctrlp_user_command')
   let g:ctrlp_user_command = g:ctrlp_find_cache#command . ' %s '
     \ . g:ctrlp_find_cache#arguments
 endif
+
+let g:ctrlp_use_caching = 0
