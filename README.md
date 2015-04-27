@@ -32,8 +32,8 @@ If you don't set this variable, it will be set to this:
 ```vim
 let g:ctrlp_find_cache#arguments =
   \ "-type f -regextype posix-extended -not -regex"
-  \ . " '^(.*\/)?(\.(cache|fontconfig|thumbnails|git)|build|CMakeFiles)(\/.*)?'"
-  \ . " -not -iregex '^.*\.(o|a|so|exe|dll|bin|pyc|gz|xz|bz2|zip|rar|pdf"
+  \ . " '^(.*\/)?(\\.(cache|fontconfig|thumbnails|git)|build|CMakeFiles)(\/.*)?'"
+  \ . " -not -iregex '^.*\\.(o|a|so|exe|dll|bin|pyc|gz|xz|bz2|zip|rar|pdf"
   \ . "|png|jpe?g|ico|gif|xpm|bak)$'"
   \ . " -not -regex '^.*[a-f]\d[a-f0-9]{10,}.*$'"
 ```
