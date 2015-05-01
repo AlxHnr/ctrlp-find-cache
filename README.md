@@ -27,17 +27,8 @@ This variable contains extra arguments, which will be passed to _find_. It
 defaults to various flags, which are needed to skip VCS directories, cache
 directories, build files and various file formats which Vim can't open.
 
-If you don't set this variable, it will be set to this:
-
-```vim
-let g:ctrlp_find_cache#arguments =
-  \ "-type f -regextype posix-extended -not -regex"
-  \ . " '^(.*\/)?(\\.(cache|fontconfig|thumbnails|git)|build|CMakeFiles)(\/.*)?'"
-  \ . " -not -iregex '^.*\\.(o|a|so|exe|dll|bin|pyc|gz|xz|bz2|zip|rar|pdf"
-  \ . "|png|jpe?g|ico|gif|xpm|bak)$'"
-  \ . " -not -regex '^.*[a-f]\d[a-f0-9]{10,}.*$'"
-```
-
+If you want to know to which value this variable defaults to, take a look
+at the [source code](https://github.com/AlxHnr/ctrlp-find-cache/blob/master/plugin/ctrlp-find-cache.vim#L47-52).
 Changing this variable after Vim has started won't affect ctrlp, unless you
 also update **g:ctrlp\_user\_command**.
 
