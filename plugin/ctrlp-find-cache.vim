@@ -46,7 +46,8 @@ endif
 if !exists('g:ctrlp_find_cache#arguments')
   let g:ctrlp_find_cache#arguments =
     \ "-type f -regextype posix-extended -not -regex"
-    \ . " '^(.*\/)?(\\.(cache|fontconfig|thumbnails|git)|build|CMakeFiles)(\/.*)?'"
+    \ . " '^(.*\/)?(\\.(cache|fontconfig|thumbnails|git)"
+    \ . "|build|CMakeFiles|target\/(release|debug|test))(\/.*)?'"
     \ . " -not -iregex '^.*\\.(o|a|so|exe|dll|bin|pyc|gz|xz|bz2|zip|rar|pdf"
     \ . "|png|jpe?g|ico|gif|xpm|bak)$'"
     \ . " -not -regex '^.*[a-f]\d[a-f0-9]{10,}.*$'"
